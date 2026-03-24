@@ -1378,10 +1378,18 @@ function App() {
       return
     }
 
-    setSelectedMatchRound((current) =>
-      current && serieARounds.includes(current) ? current : serieARounds[0] || '',
+    const nextOpenRound = serieARounds.find((round) =>
+      activeCompetitionData.matches
+        .filter((match) => match.round === round)
+        .some((match) => !isMatchLocked(match, now)),
     )
-  }, [activeLeague?.competitionId, activeLeague?.id, serieARounds])
+
+    setSelectedMatchRound((current) =>
+      current && serieARounds.includes(current)
+        ? current
+        : nextOpenRound || serieARounds[serieARounds.length - 1] || '',
+    )
+  }, [activeCompetitionData.matches, activeLeague?.competitionId, activeLeague?.id, now, serieARounds])
 
   const openLeagueDetail = (leagueId) => {
     setSelectedLeagueId(leagueId)
