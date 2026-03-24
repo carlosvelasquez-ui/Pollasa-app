@@ -226,7 +226,7 @@ const fallbackFixturesByCompetition = {
   'ecuador-serie-a': {
     source: 'ESPN / LigaPro',
     updatedAt: '23 marzo 2026',
-    note: 'Partidos recientes y del dia tomados del calendario de LigaPro Ecuador.',
+    note: 'Partidos recientes y hasta las 3 siguientes fechas tomados del calendario de LigaPro Ecuador.',
     competitionResults: {
       champion: '',
       runnerUp: '',
@@ -238,7 +238,7 @@ const fallbackFixturesByCompetition = {
       {
         id: 1,
         stageKey: 'league',
-        round: 'Fecha en curso',
+        round: 'Fecha 6',
         home: 'Guayaquil City FC',
         away: 'Leones',
         kickoff: '23 mar 2026 · 17:30',
@@ -250,7 +250,7 @@ const fallbackFixturesByCompetition = {
       {
         id: 2,
         stageKey: 'league',
-        round: 'Fecha en curso',
+        round: 'Fecha 6',
         home: 'Aucas',
         away: 'Orense',
         kickoff: '23 mar 2026 · 20:00',
@@ -262,7 +262,7 @@ const fallbackFixturesByCompetition = {
       {
         id: 3,
         stageKey: 'league',
-        round: 'Fecha en curso',
+        round: 'Fecha 6',
         home: 'Mushuc Runa',
         away: 'Emelec',
         kickoff: '22 mar 2026 · 19:15',
@@ -275,7 +275,7 @@ const fallbackFixturesByCompetition = {
       {
         id: 4,
         stageKey: 'league',
-        round: 'Fecha en curso',
+        round: 'Fecha 6',
         home: 'Liga de Quito',
         away: 'Manta F.C.',
         kickoff: '22 mar 2026 · 20:00',
@@ -284,6 +284,78 @@ const fallbackFixturesByCompetition = {
         details: 'Fixture de Liga de Quito en ESPN',
         status: 'completed',
         result: { home: 2, away: 1 },
+      },
+      {
+        id: 5,
+        stageKey: 'league',
+        round: 'Fecha 7',
+        home: 'Barcelona SC',
+        away: 'Delfin',
+        kickoff: '29 mar 2026 · 18:00',
+        startsAt: '2026-03-29T18:00:00-05:00',
+        venue: 'Monumental Banco Pichincha, Guayaquil',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 6,
+        stageKey: 'league',
+        round: 'Fecha 7',
+        home: 'Independiente del Valle',
+        away: 'El Nacional',
+        kickoff: '29 mar 2026 · 20:30',
+        startsAt: '2026-03-29T20:30:00-05:00',
+        venue: 'Banco Guayaquil, Quito',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 7,
+        stageKey: 'league',
+        round: 'Fecha 8',
+        home: 'Emelec',
+        away: 'Aucas',
+        kickoff: '5 abr 2026 · 16:30',
+        startsAt: '2026-04-05T16:30:00-05:00',
+        venue: 'George Capwell, Guayaquil',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 8,
+        stageKey: 'league',
+        round: 'Fecha 8',
+        home: 'Orense',
+        away: 'Liga de Quito',
+        kickoff: '5 abr 2026 · 19:00',
+        startsAt: '2026-04-05T19:00:00-05:00',
+        venue: '9 de Mayo, Machala',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 9,
+        stageKey: 'league',
+        round: 'Fecha 9',
+        home: 'Liga de Quito',
+        away: 'Barcelona SC',
+        kickoff: '12 abr 2026 · 18:30',
+        startsAt: '2026-04-12T18:30:00-05:00',
+        venue: 'Rodrigo Paz Delgado, Quito',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 10,
+        stageKey: 'league',
+        round: 'Fecha 9',
+        home: 'Delfin',
+        away: 'Emelec',
+        kickoff: '12 abr 2026 · 15:00',
+        startsAt: '2026-04-12T15:00:00-05:00',
+        venue: 'Jocay, Manta',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
       },
     ],
   },
@@ -739,6 +811,7 @@ function App() {
   )
   const [selectedPool, setSelectedPool] = useState(featuredPools[0].id)
   const [leagueForm, setLeagueForm] = useState(initialLeagueForm)
+  const [selectedMatchRound, setSelectedMatchRound] = useState('')
   const [authMode, setAuthMode] = useState('signup')
   const [signupForm, setSignupForm] = useState(initialAuthForm)
   const [loginForm, setLoginForm] = useState({ email: '', password: '' })
@@ -985,6 +1058,41 @@ function App() {
     () => featuredPools.find((pool) => pool.id === selectedPool) || featuredPools[0],
     [selectedPool],
   )
+
+  const serieARounds = useMemo(() => {
+    if (activeLeague?.competitionId !== 'ecuador-serie-a') {
+      return []
+    }
+
+    const rounds = [...new Set(activeCompetitionData.matches.map((match) => match.round))]
+    const firstOpenIndex = rounds.findIndex((round) =>
+      activeCompetitionData.matches
+        .filter((match) => match.round === round)
+        .some((match) => !isMatchLocked(match, now)),
+    )
+    const startIndex = firstOpenIndex >= 0 ? firstOpenIndex : 0
+
+    return rounds.slice(startIndex, startIndex + 4)
+  }, [activeCompetitionData.matches, activeLeague?.competitionId, now])
+
+  const visibleMatches = useMemo(() => {
+    if (activeLeague?.competitionId === 'ecuador-serie-a' && selectedMatchRound) {
+      return activeCompetitionData.matches.filter((match) => match.round === selectedMatchRound)
+    }
+
+    return activeCompetitionData.matches
+  }, [activeCompetitionData.matches, activeLeague?.competitionId, selectedMatchRound])
+
+  useEffect(() => {
+    if (activeLeague?.competitionId !== 'ecuador-serie-a') {
+      setSelectedMatchRound('')
+      return
+    }
+
+    setSelectedMatchRound((current) =>
+      current && serieARounds.includes(current) ? current : serieARounds[0] || '',
+    )
+  }, [activeLeague?.competitionId, activeLeague?.id, serieARounds])
 
   const openLeagueDetail = (leagueId) => {
     setSelectedLeagueId(leagueId)
@@ -2193,8 +2301,22 @@ function App() {
                 <span className="muted-chip">{activeCompetitionData.updatedAt}</span>
               </div>
 
+              {activeLeague.competitionId === 'ecuador-serie-a' && serieARounds.length > 0 && (
+                <div className="round-switcher">
+                  {serieARounds.map((round) => (
+                    <button
+                      key={round}
+                      className={selectedMatchRound === round ? 'round-chip active' : 'round-chip'}
+                      onClick={() => setSelectedMatchRound(round)}
+                    >
+                      {round}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <div className="match-list">
-                {activeCompetitionData.matches.map((match) => {
+                {visibleMatches.map((match) => {
                   const locked = isMatchLocked(match, now)
                   const lockAt = lockTimestamp(match)
                   const reveal = isPredictionRevealed(match, now)
