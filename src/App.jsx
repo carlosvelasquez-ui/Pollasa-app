@@ -1184,8 +1184,17 @@ function App() {
         })
 
         await refreshRemoteState(currentUser.id, activeLeague.id)
-      } catch {
-        setInviteFeedback('No pudimos actualizar la solicitud.')
+        setInviteFeedback(
+          nextStatus === 'approved'
+            ? 'Solicitud aprobada correctamente.'
+            : 'Solicitud bloqueada correctamente.',
+        )
+      } catch (error) {
+        setInviteFeedback(
+          error?.message
+            ? `No pudimos actualizar la solicitud: ${error.message}`
+            : 'No pudimos actualizar la solicitud.',
+        )
       }
 
       return
