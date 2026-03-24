@@ -1134,14 +1134,29 @@
 }
 
 .teams-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   gap: 16px;
 }
 
 .score-inputs {
+  justify-self: center;
   align-items: center;
+  justify-content: center;
   gap: 10px;
+}
+
+.teams-row > div:first-child,
+.teams-row > .away-team {
+  min-width: 0;
+}
+
+.teams-row > div:first-child strong,
+.away-team strong,
+.teams-row > div:first-child small,
+.away-team small {
+  display: block;
 }
 
 .score-inputs input,
@@ -1397,8 +1412,14 @@
     text-align: left;
   }
 
+  .teams-row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
   .score-inputs {
-    justify-content: flex-start;
+    justify-self: stretch;
+    justify-content: center;
   }
 
   .leader-trend,
