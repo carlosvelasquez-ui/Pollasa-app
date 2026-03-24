@@ -1,0 +1,236 @@
+{
+  "updatedAt": "2026-03-23",
+  "competitions": {
+    "champions": {
+      "source": "UEFA",
+      "updatedAt": "23 marzo 2026",
+      "note": "Resultados oficiales recientes y calendario confirmado de UEFA Champions League 2025/26.",
+      "competitionResults": {
+        "champion": "",
+        "runnerUp": "",
+        "third": "",
+        "fourth": "",
+        "topScorer": ""
+      },
+      "matches": [
+        {
+          "id": 1,
+          "stageKey": "round_of_16",
+          "round": "Octavos · vuelta",
+          "home": "Arsenal",
+          "away": "Leverkusen",
+          "kickoff": "17 mar 2026 · 21:00 CET",
+          "startsAt": "2026-03-17T21:00:00+01:00",
+          "venue": "UEFA Champions League",
+          "details": "Resultado oficial UEFA",
+          "status": "completed",
+          "result": { "home": 2, "away": 0 }
+        },
+        {
+          "id": 2,
+          "stageKey": "round_of_16",
+          "round": "Octavos · vuelta",
+          "home": "Chelsea",
+          "away": "Paris Saint-Germain",
+          "kickoff": "17 mar 2026 · 21:00 CET",
+          "startsAt": "2026-03-17T21:00:00+01:00",
+          "venue": "UEFA Champions League",
+          "details": "Resultado oficial UEFA",
+          "status": "completed",
+          "result": { "home": 0, "away": 3 }
+        },
+        {
+          "id": 3,
+          "stageKey": "round_of_16",
+          "round": "Octavos · vuelta",
+          "home": "Manchester City",
+          "away": "Real Madrid",
+          "kickoff": "17 mar 2026 · 21:00 CET",
+          "startsAt": "2026-03-17T21:00:00+01:00",
+          "venue": "UEFA Champions League",
+          "details": "Resultado oficial UEFA",
+          "status": "completed",
+          "result": { "home": 1, "away": 2 }
+        },
+        {
+          "id": 4,
+          "stageKey": "round_of_16",
+          "round": "Octavos · vuelta",
+          "home": "Barcelona",
+          "away": "Newcastle",
+          "kickoff": "18 mar 2026 · 21:00 CET",
+          "startsAt": "2026-03-18T21:00:00+01:00",
+          "venue": "UEFA Champions League",
+          "details": "Resultado oficial UEFA",
+          "status": "completed",
+          "result": { "home": 7, "away": 2 }
+        },
+        {
+          "id": 5,
+          "stageKey": "quarterfinal",
+          "round": "Cuartos · ida",
+          "home": "Sporting CP",
+          "away": "Arsenal",
+          "kickoff": "7 abr 2026 · 21:00 CET",
+          "startsAt": "2026-04-07T21:00:00+02:00",
+          "venue": "UEFA Champions League",
+          "details": "Llave oficial UEFA",
+          "status": "scheduled"
+        }
+      ]
+    },
+    "libertadores": {
+      "source": "CONMEBOL",
+      "updatedAt": "23 marzo 2026",
+      "note": "Programa oficial de partidos de fases preliminares publicado por CONMEBOL.",
+      "competitionResults": {
+        "champion": "",
+        "runnerUp": "",
+        "third": "",
+        "fourth": "",
+        "topScorer": ""
+      },
+      "matches": [
+        {
+          "id": 1,
+          "stageKey": "round_of_16",
+          "round": "Fase 3 · ida",
+          "home": "Barcelona",
+          "away": "Botafogo",
+          "kickoff": "3 mar 2026 · 19:30 local",
+          "startsAt": "2026-03-03T19:30:00-05:00",
+          "venue": "Monumental Banco Pichincha, Guayaquil",
+          "details": "CONMEBOL Libertadores 2026",
+          "status": "completed",
+          "result": { "home": 1, "away": 1 }
+        },
+        {
+          "id": 2,
+          "stageKey": "round_of_16",
+          "round": "Fase 3 · vuelta",
+          "home": "Botafogo",
+          "away": "Barcelona",
+          "kickoff": "10 mar 2026 · 21:30 local",
+          "startsAt": "2026-03-10T21:30:00-03:00",
+          "venue": "Nilton Santos, Rio de Janeiro",
+          "details": "CONMEBOL Libertadores 2026",
+          "status": "scheduled"
+        },
+        {
+          "id": 3,
+          "stageKey": "group",
+          "round": "Fase de grupos",
+          "home": "LDU Quito",
+          "away": "River Plate",
+          "kickoff": "26 mar 2026 · 19:00 local",
+          "startsAt": "2026-03-26T19:00:00-05:00",
+          "venue": "Casa Blanca, Quito",
+          "details": "Simulacion de apertura de grupos",
+          "status": "scheduled"
+        }
+      ]
+    },
+    "ecuador-serie-a": {
+      "source": "ESPN / LigaPro",
+      "updatedAt": "23 marzo 2026",
+      "note": "Partidos recientes y del dia tomados del calendario de LigaPro Ecuador.",
+      "competitionResults": {
+        "champion": "",
+        "runnerUp": "",
+        "third": "",
+        "fourth": "",
+        "topScorer": ""
+      },
+      "matches": [
+        {
+          "id": 1,
+          "stageKey": "league",
+          "round": "Fecha en curso",
+          "home": "Guayaquil City FC",
+          "away": "Leones",
+          "kickoff": "23 mar 2026 · 17:30",
+          "startsAt": "2026-03-23T17:30:00-05:00",
+          "venue": "Christian Benitez, Quito",
+          "details": "Calendario LigaPro Ecuador",
+          "status": "scheduled"
+        },
+        {
+          "id": 2,
+          "stageKey": "league",
+          "round": "Fecha en curso",
+          "home": "Aucas",
+          "away": "Orense",
+          "kickoff": "23 mar 2026 · 20:00",
+          "startsAt": "2026-03-23T20:00:00-05:00",
+          "venue": "Gonzalo Pozo Ripalda, Quito",
+          "details": "Calendario LigaPro Ecuador",
+          "status": "scheduled"
+        },
+        {
+          "id": 3,
+          "stageKey": "league",
+          "round": "Fecha en curso",
+          "home": "Mushuc Runa",
+          "away": "Emelec",
+          "kickoff": "22 mar 2026 · 19:15",
+          "startsAt": "2026-03-22T19:15:00-05:00",
+          "venue": "LigaPro Ecuador",
+          "details": "Fixture de Emelec en ESPN",
+          "status": "completed",
+          "result": { "home": 1, "away": 0 }
+        },
+        {
+          "id": 4,
+          "stageKey": "league",
+          "round": "Fecha en curso",
+          "home": "Liga de Quito",
+          "away": "Manta F.C.",
+          "kickoff": "22 mar 2026 · 20:00",
+          "startsAt": "2026-03-22T20:00:00-05:00",
+          "venue": "LigaPro Ecuador",
+          "details": "Fixture de Liga de Quito en ESPN",
+          "status": "completed",
+          "result": { "home": 2, "away": 1 }
+        }
+      ]
+    },
+    "world-cup": {
+      "source": "FIFA",
+      "updatedAt": "23 marzo 2026",
+      "note": "Datos oficiales del calendario del Mundial 2026 publicado por FIFA.",
+      "competitionResults": {
+        "champion": "",
+        "runnerUp": "",
+        "third": "",
+        "fourth": "",
+        "topScorer": ""
+      },
+      "matches": [
+        {
+          "id": 1,
+          "stageKey": "group",
+          "round": "Grupo A",
+          "home": "Mexico",
+          "away": "Sudafrica",
+          "kickoff": "11 jun 2026 · 13:00 local",
+          "startsAt": "2026-06-11T13:00:00-06:00",
+          "venue": "Mexico City Stadium",
+          "details": "Partido inaugural",
+          "status": "scheduled"
+        },
+        {
+          "id": 2,
+          "stageKey": "group",
+          "round": "Grupo B",
+          "home": "Canada",
+          "away": "Paraguay",
+          "kickoff": "12 jun 2026 · horario por confirmar",
+          "startsAt": "2026-06-12T19:00:00-04:00",
+          "venue": "Toronto Stadium",
+          "details": "Debut del anfitrion Canada",
+          "status": "scheduled"
+        }
+      ]
+    }
+  }
+}
