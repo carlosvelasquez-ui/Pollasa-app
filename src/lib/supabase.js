@@ -281,21 +281,52 @@ export async function requestJoinLeagueRemote(inviteCode, currentUserId) {
     throw new Error('Supabase no configurado.')
   }
 
-  const { data: league, error: leagueError } = await supabase
-    .from('leagues')
-    .select('*')
-    .eq('invite_code', inviteCode)
-    .maybeSingle()
+  const { data: league, error: leagueError } = await withSupabaseRetry(() =>
+    supabase.from('leagues').select('*').eq('invite_code', inviteCode).maybeSingle(),
+  )
 
   if (leagueError) throw leagueError
   if (!league) return null
 
-  const { error } = await supabase.from('join_requests').upsert({
-    league_id: league.id,
-    user_id: currentUserId,
-    status: 'pending',
-    requested_at: new Date().toISOString(),
-  })
+  const { data: existingRequest, error: existingRequestError } = await withSupabaseRetry(() =>
+    supabase
+      .from('join_requests')
+      .select('*')
+      .eq('league_id', league.id)
+      .eq('user_id', currentUserId)
+      .maybeSingle(),
+  )
+
+  if (existingRequestError) throw existingRequestError
+
+  if (!existingRequest) {
+    const { error } = await withSupabaseRetry(() =>
+      supabase.from('join_requests').insert({
+        league_id: league.id,
+        user_id: currentUserId,
+        status: 'pending',
+        requested_at: new Date().toISOString(),
+      }),
+    )
+
+    if (error) throw error
+    return league
+  }
+
+  if (existingRequest.status === 'pending') {
+    return league
+  }
+
+  const { error } = await withSupabaseRetry(() =>
+    supabase
+      .from('join_requests')
+      .update({
+        status: 'pending',
+        requested_at: new Date().toISOString(),
+      })
+      .eq('league_id', league.id)
+      .eq('user_id', currentUserId),
+  )
 
   if (error) throw error
   return league

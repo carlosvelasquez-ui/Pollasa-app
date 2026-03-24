@@ -164,6 +164,13 @@ with check (
   )
 );
 
+drop policy if exists "join_requests_update_own" on public.join_requests;
+create policy "join_requests_update_own"
+on public.join_requests for update
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
 drop policy if exists "join_requests_delete_owner" on public.join_requests;
 create policy "join_requests_delete_owner"
 on public.join_requests for delete

@@ -1098,8 +1098,12 @@ function App() {
         } else {
           setInviteFeedback('No encontramos una liga con ese codigo.')
         }
-      } catch {
-        setInviteFeedback('No pudimos enviar la solicitud. Revisa la configuracion de Supabase.')
+      } catch (error) {
+        setInviteFeedback(
+          error?.message
+            ? `No pudimos enviar la solicitud: ${error.message}`
+            : 'No pudimos enviar la solicitud. Revisa la configuracion de Supabase.',
+        )
       }
 
       return
