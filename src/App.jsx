@@ -373,9 +373,7 @@ function buildEntry(competitionId) {
     fallbackFixturesByCompetition[competitionId] || fallbackFixturesByCompetition.champions
 
   return {
-    predictions: Object.fromEntries(
-      fixturePack.matches.map((match, index) => [match.id, { home: index + 1, away: index }]),
-    ),
+    predictions: {},
     bonusPicks: defaultBonusPicks(),
   }
 }
@@ -646,7 +644,14 @@ function formatCountdown(target, now) {
 }
 
 function calculateMatchPoints(prediction, result, stageKey, scoring) {
-  if (!prediction || !result) {
+  if (
+    !prediction ||
+    !result ||
+    prediction.home === '' ||
+    prediction.away === '' ||
+    prediction.home === null ||
+    prediction.away === null
+  ) {
     return 0
   }
 
@@ -741,6 +746,7 @@ function App() {
   const [joinCode, setJoinCode] = useState('')
   const [authMessage, setAuthMessage] = useState('')
   const [inviteFeedback, setInviteFeedback] = useState('')
+  const [approvalFeedback, setApprovalFeedback] = useState('')
   const [isBooting, setIsBooting] = useState(true)
   const [now, setNow] = useState(Date.now())
   const [isRemoteSyncing, setIsRemoteSyncing] = useState(false)
@@ -1184,13 +1190,13 @@ function App() {
         })
 
         await refreshRemoteState(currentUser.id, activeLeague.id)
-        setInviteFeedback(
+        setApprovalFeedback(
           nextStatus === 'approved'
             ? 'Solicitud aprobada correctamente.'
             : 'Solicitud bloqueada correctamente.',
         )
       } catch (error) {
-        setInviteFeedback(
+        setApprovalFeedback(
           error?.message
             ? `No pudimos actualizar la solicitud: ${error.message}`
             : 'No pudimos actualizar la solicitud.',
@@ -1228,6 +1234,35 @@ function App() {
 
   const updatePrediction = async (match, side, value) => {
     if (!activeLeague || !currentUser || isMatchLocked(match, now)) {
+      return
+    }
+
+    if (value === '') {
+      const currentEntry = leagueEntries?.[activeLeague.id]?.[currentUser.id] || buildEntry(activeLeague.competitionId)
+      const nextPredictions = { ...currentEntry.predictions }
+
+      if (nextPredictions[match.id]) {
+        nextPredictions[match.id] = {
+          ...nextPredictions[match.id],
+          [side]: '',
+        }
+      }
+
+      const nextEntry = {
+        ...currentEntry,
+        predictions: nextPredictions,
+      }
+
+      updateLeagueEntry(activeLeague.id, currentUser.id, () => nextEntry)
+
+      if (isSupabaseConfigured) {
+        try {
+          await saveLeagueEntryRemote(activeLeague.id, currentUser.id, nextEntry)
+        } catch {
+          setInviteFeedback('No pudimos guardar tu pronostico en la nube.')
+        }
+      }
+
       return
     }
 
@@ -2150,7 +2185,7 @@ function App() {
                               min="0"
                               max="9"
                               disabled={locked}
-                              value={activeEntry?.predictions?.[match.id]?.home ?? 0}
+                              value={activeEntry?.predictions?.[match.id]?.home ?? ''}
                               onChange={(event) =>
                                 updatePrediction(match, 'home', event.target.value)
                               }
@@ -2164,7 +2199,7 @@ function App() {
                               min="0"
                               max="9"
                               disabled={locked}
-                              value={activeEntry?.predictions?.[match.id]?.away ?? 0}
+                              value={activeEntry?.predictions?.[match.id]?.away ?? ''}
                               onChange={(event) =>
                                 updatePrediction(match, 'away', event.target.value)
                               }
@@ -2499,12 +2534,14 @@ function App() {
                           <div className="request-actions">
                             <button
                               className="primary-btn"
+                              type="button"
                               onClick={() => handleRequestDecision(request.userId, 'approved')}
                             >
                               Aprobar
                             </button>
                             <button
                               className="secondary-btn"
+                              type="button"
                               onClick={() => handleRequestDecision(request.userId, 'blocked')}
                             >
                               Bloquear
@@ -2520,6 +2557,7 @@ function App() {
                     bloquear.
                   </p>
                 )}
+                <p className="auth-message">{approvalFeedback || 'Aqui veras el resultado de aprobar o bloquear.'}</p>
               </div>
             )}
 
