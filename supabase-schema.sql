@@ -224,3 +224,61 @@ using (
       and leagues.owner_id = auth.uid()
   )
 );
+
+create or replace function public.handle_join_request(
+  p_league_id text,
+  p_user_id uuid,
+  p_next_status text,
+  p_predictions jsonb default '{}'::jsonb,
+  p_bonus_picks jsonb default '{}'::jsonb
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_owner_id uuid;
+begin
+  select owner_id
+  into v_owner_id
+  from public.leagues
+  where id = p_league_id;
+
+  if v_owner_id is null then
+    raise exception 'Liga no encontrada.';
+  end if;
+
+  if auth.uid() <> v_owner_id then
+    raise exception 'Solo el administrador puede gestionar solicitudes.';
+  end if;
+
+  update public.join_requests
+  set status = p_next_status,
+      requested_at = now()
+  where league_id = p_league_id
+    and user_id = p_user_id;
+
+  if not found then
+    raise exception 'Solicitud no encontrada.';
+  end if;
+
+  if p_next_status = 'approved' then
+    insert into public.league_members (league_id, user_id)
+    values (p_league_id, p_user_id)
+    on conflict (league_id, user_id) do nothing;
+
+    insert into public.league_entries (league_id, user_id, predictions, bonus_picks)
+    values (p_league_id, p_user_id, coalesce(p_predictions, '{}'::jsonb), coalesce(p_bonus_picks, '{}'::jsonb))
+    on conflict (league_id, user_id) do nothing;
+  end if;
+
+  return jsonb_build_object(
+    'league_id', p_league_id,
+    'user_id', p_user_id,
+    'status', p_next_status
+  );
+end;
+$$;
+
+grant execute on function public.handle_join_request(text, uuid, text, jsonb, jsonb) to authenticated;

@@ -336,82 +336,25 @@ export async function updateJoinRequestRemote({
   leagueId,
   userId,
   nextStatus,
-  competitionId,
   entry,
 }) {
   if (!supabase) {
     throw new Error('Supabase no configurado.')
   }
 
-  const { data: updatedRequests, error: requestError } = await withSupabaseRetry(() =>
-    supabase
-      .from('join_requests')
-      .update({
-        status: nextStatus,
-        requested_at: new Date().toISOString(),
-      })
-      .eq('league_id', leagueId)
-      .eq('user_id', userId)
-      .select(),
+  const { data, error } = await withSupabaseRetry(() =>
+    supabase.rpc('handle_join_request', {
+      p_league_id: leagueId,
+      p_user_id: userId,
+      p_next_status: nextStatus,
+      p_predictions: entry.predictions,
+      p_bonus_picks: entry.bonusPicks,
+    }),
   )
 
-  if (requestError) throw requestError
-  if (!updatedRequests?.length) {
-    throw new Error('Supabase no pudo actualizar la solicitud. Revisa las policies de join_requests.')
-  }
-
-  if (nextStatus === 'approved') {
-    const { data: existingMember, error: existingMemberError } = await withSupabaseRetry(() =>
-      supabase
-        .from('league_members')
-        .select('*')
-        .eq('league_id', leagueId)
-        .eq('user_id', userId)
-        .maybeSingle(),
-    )
-
-    if (existingMemberError) throw existingMemberError
-
-    if (!existingMember) {
-      const { data: insertedMembers, error: memberError } = await withSupabaseRetry(() =>
-        supabase.from('league_members').insert({
-          league_id: leagueId,
-          user_id: userId,
-        }).select(),
-      )
-
-      if (memberError) throw memberError
-      if (!insertedMembers?.length) {
-        throw new Error('Supabase no pudo agregar al jugador como miembro.')
-      }
-    }
-
-    const { data: existingEntry, error: existingEntryError } = await withSupabaseRetry(() =>
-      supabase
-        .from('league_entries')
-        .select('*')
-        .eq('league_id', leagueId)
-        .eq('user_id', userId)
-        .maybeSingle(),
-    )
-
-    if (existingEntryError) throw existingEntryError
-
-    if (!existingEntry) {
-      const { data: insertedEntries, error: entryError } = await withSupabaseRetry(() =>
-        supabase.from('league_entries').insert({
-          league_id: leagueId,
-          user_id: userId,
-          predictions: entry.predictions,
-          bonus_picks: entry.bonusPicks,
-        }).select(),
-      )
-
-      if (entryError) throw entryError
-      if (!insertedEntries?.length) {
-        throw new Error('Supabase no pudo crear la entrada inicial del jugador.')
-      }
-    }
+  if (error) throw error
+  if (!data) {
+    throw new Error('Supabase no devolvio respuesta al procesar la solicitud.')
   }
 }
 
