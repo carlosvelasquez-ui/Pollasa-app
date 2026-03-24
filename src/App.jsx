@@ -287,6 +287,56 @@ const fallbackFixturesByCompetition = {
         result: { home: 2, away: 1 },
       },
       {
+        id: 17,
+        stageKey: 'league',
+        round: 'Fecha 6',
+        home: 'Barcelona SC',
+        away: 'Deportivo Cuenca',
+        kickoff: '22 mar 2026 · 16:00',
+        startsAt: '2026-03-22T16:00:00-05:00',
+        venue: 'Monumental Banco Pichincha, Guayaquil',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'completed',
+        result: { home: 3, away: 1 },
+      },
+      {
+        id: 18,
+        stageKey: 'league',
+        round: 'Fecha 6',
+        home: 'Independiente del Valle',
+        away: 'Libertad',
+        kickoff: '22 mar 2026 · 18:00',
+        startsAt: '2026-03-22T18:00:00-05:00',
+        venue: 'Banco Guayaquil, Quito',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'completed',
+        result: { home: 2, away: 0 },
+      },
+      {
+        id: 19,
+        stageKey: 'league',
+        round: 'Fecha 6',
+        home: 'El Nacional',
+        away: 'Universidad Catolica',
+        kickoff: '23 mar 2026 · 15:00',
+        startsAt: '2026-03-23T15:00:00-05:00',
+        venue: 'Olimpico Atahualpa, Quito',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 20,
+        stageKey: 'league',
+        round: 'Fecha 6',
+        home: 'Delfin',
+        away: 'Tecnico Universitario',
+        kickoff: '23 mar 2026 · 19:00',
+        startsAt: '2026-03-23T19:00:00-05:00',
+        venue: 'Jocay, Manta',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
         id: 5,
         stageKey: 'league',
         round: 'Fecha 7',
@@ -331,6 +381,54 @@ const fallbackFixturesByCompetition = {
         kickoff: '30 mar 2026 · 21:15',
         startsAt: '2026-03-30T21:15:00-05:00',
         venue: 'Reina del Cisne, Loja',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 21,
+        stageKey: 'league',
+        round: 'Fecha 7',
+        home: 'Orense',
+        away: 'Tecnico Universitario',
+        kickoff: '29 mar 2026 · 15:30',
+        startsAt: '2026-03-29T15:30:00-05:00',
+        venue: '9 de Mayo, Machala',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 22,
+        stageKey: 'league',
+        round: 'Fecha 7',
+        home: 'Liga de Quito',
+        away: 'Manta F.C.',
+        kickoff: '30 mar 2026 · 16:30',
+        startsAt: '2026-03-30T16:30:00-05:00',
+        venue: 'Rodrigo Paz Delgado, Quito',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 23,
+        stageKey: 'league',
+        round: 'Fecha 7',
+        home: 'Leones',
+        away: 'Guayaquil City FC',
+        kickoff: '31 mar 2026 · 18:30',
+        startsAt: '2026-03-31T18:30:00-05:00',
+        venue: '7 de Octubre, Quevedo',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 24,
+        stageKey: 'league',
+        round: 'Fecha 7',
+        home: 'Universidad Catolica',
+        away: 'Emelec',
+        kickoff: '31 mar 2026 · 20:45',
+        startsAt: '2026-03-31T20:45:00-05:00',
+        venue: 'Atahualpa, Quito',
         details: 'Calendario LigaPro Ecuador',
         status: 'scheduled',
       },
@@ -383,6 +481,54 @@ const fallbackFixturesByCompetition = {
         status: 'scheduled',
       },
       {
+        id: 25,
+        stageKey: 'league',
+        round: 'Fecha 8',
+        home: 'Tecnico Universitario',
+        away: 'Libertad',
+        kickoff: '5 abr 2026 · 14:00',
+        startsAt: '2026-04-05T14:00:00-05:00',
+        venue: 'Bellavista, Ambato',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 26,
+        stageKey: 'league',
+        round: 'Fecha 8',
+        home: 'Manta F.C.',
+        away: 'Deportivo Cuenca',
+        kickoff: '5 abr 2026 · 18:15',
+        startsAt: '2026-04-05T18:15:00-05:00',
+        venue: 'Jocay, Manta',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 27,
+        stageKey: 'league',
+        round: 'Fecha 8',
+        home: 'Leones',
+        away: 'Orense',
+        kickoff: '6 abr 2026 · 16:00',
+        startsAt: '2026-04-06T16:00:00-05:00',
+        venue: '7 de Octubre, Quevedo',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 28,
+        stageKey: 'league',
+        round: 'Fecha 8',
+        home: 'Universidad Catolica',
+        away: 'Guayaquil City FC',
+        kickoff: '6 abr 2026 · 21:00',
+        startsAt: '2026-04-06T21:00:00-05:00',
+        venue: 'Atahualpa, Quito',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
         id: 9,
         stageKey: 'league',
         round: 'Fecha 9',
@@ -427,6 +573,54 @@ const fallbackFixturesByCompetition = {
         kickoff: '13 abr 2026 · 21:15',
         startsAt: '2026-04-13T21:15:00-05:00',
         venue: 'Echaleche, Ambato',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 29,
+        stageKey: 'league',
+        round: 'Fecha 9',
+        home: 'Independiente del Valle',
+        away: 'Leones',
+        kickoff: '12 abr 2026 · 13:00',
+        startsAt: '2026-04-12T13:00:00-05:00',
+        venue: 'Banco Guayaquil, Quito',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 30,
+        stageKey: 'league',
+        round: 'Fecha 9',
+        home: 'Libertad',
+        away: 'Delfin',
+        kickoff: '12 abr 2026 · 17:00',
+        startsAt: '2026-04-12T17:00:00-05:00',
+        venue: 'Reina del Cisne, Loja',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 31,
+        stageKey: 'league',
+        round: 'Fecha 9',
+        home: 'El Nacional',
+        away: 'Deportivo Cuenca',
+        kickoff: '13 abr 2026 · 16:30',
+        startsAt: '2026-04-13T16:30:00-05:00',
+        venue: 'Atahualpa, Quito',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 32,
+        stageKey: 'league',
+        round: 'Fecha 9',
+        home: 'Manta F.C.',
+        away: 'Tecnico Universitario',
+        kickoff: '13 abr 2026 · 20:00',
+        startsAt: '2026-04-13T20:00:00-05:00',
+        venue: 'Jocay, Manta',
         details: 'Calendario LigaPro Ecuador',
         status: 'scheduled',
       },
@@ -909,6 +1103,7 @@ function App() {
   const [inviteFeedback, setInviteFeedback] = useState('')
   const [approvalFeedback, setApprovalFeedback] = useState('')
   const [requestActionKey, setRequestActionKey] = useState('')
+  const [selectedBonusViewerId, setSelectedBonusViewerId] = useState('')
   const [isBooting, setIsBooting] = useState(true)
   const [now, setNow] = useState(Date.now())
   const [isRemoteSyncing, setIsRemoteSyncing] = useState(false)
@@ -2823,6 +3018,19 @@ function App() {
                           <div className="request-actions">
                             <button
                               className="secondary-btn"
+                              type="button"
+                              onClick={() =>
+                                setSelectedBonusViewerId((current) =>
+                                  current === userId ? '' : userId,
+                                )
+                              }
+                            >
+                              {selectedBonusViewerId === userId
+                                ? 'Ocultar picks extra'
+                                : 'Ver picks extra'}
+                            </button>
+                            <button
+                              className="secondary-btn"
                               onClick={() => handleRemoveMember(userId)}
                             >
                               Botar de la liga
@@ -2851,6 +3059,34 @@ function App() {
                     )
                   })}
                 </div>
+                {isAdmin && selectedBonusViewerId && (
+                  <div className="bonus-viewer-card">
+                    <div className="panel-header">
+                      <h3>
+                        Picks extra de{' '}
+                        {users.find((item) => item.id === selectedBonusViewerId)?.name ||
+                          'Participante'}
+                      </h3>
+                      <span className="muted-chip">
+                        {activeLeague.bonusEditOverrides?.[selectedBonusViewerId]
+                          ? 'Edicion habilitada'
+                          : 'Edicion cerrada'}
+                      </span>
+                    </div>
+                    <div className="bonus-viewer-grid">
+                      {bonusFields.map((field) => (
+                        <div key={field.id} className="bonus-viewer-item">
+                          <span>{field.label}</span>
+                          <strong>
+                            {leagueEntries?.[activeLeague.id]?.[selectedBonusViewerId]?.bonusPicks?.[
+                              field.id
+                            ] || 'En blanco'}
+                          </strong>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
