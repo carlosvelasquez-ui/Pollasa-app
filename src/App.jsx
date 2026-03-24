@@ -3014,7 +3014,7 @@ function App() {
                                 : user?.email || 'Jugador de la liga'}
                           </small>
                         </div>
-                        {isAdmin && !isOwner ? (
+                        {isAdmin ? (
                           <div className="request-actions">
                             <button
                               className="secondary-btn"
@@ -3031,12 +3031,6 @@ function App() {
                             </button>
                             <button
                               className="secondary-btn"
-                              onClick={() => handleRemoveMember(userId)}
-                            >
-                              Botar de la liga
-                            </button>
-                            <button
-                              className="secondary-btn"
                               type="button"
                               onClick={() =>
                                 toggleBonusPermission(
@@ -3049,6 +3043,14 @@ function App() {
                                 ? 'Cerrar picks extra'
                                 : 'Abrir picks extra'}
                             </button>
+                            {!isOwner && (
+                              <button
+                                className="secondary-btn"
+                                onClick={() => handleRemoveMember(userId)}
+                              >
+                                Botar de la liga
+                              </button>
+                            )}
                           </div>
                         ) : (
                           <span className="muted-chip">
