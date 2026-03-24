@@ -1383,14 +1383,6 @@ function App() {
     )
   }, [activeLeague?.competitionId, activeLeague?.id, serieARounds])
 
-  useEffect(() => {
-    setSelectedHistoryRound((current) =>
-      current && revealedRounds.includes(current)
-        ? current
-        : revealedRounds[revealedRounds.length - 1] || '',
-    )
-  }, [revealedRounds, activeLeague?.id])
-
   const openLeagueDetail = (leagueId) => {
     setSelectedLeagueId(leagueId)
     setHomeLeagueView('detail')
@@ -1488,6 +1480,14 @@ function App() {
 
     return revealedMatches.filter((match) => match.round === selectedHistoryRound)
   }, [revealedMatches, selectedHistoryRound])
+
+  useEffect(() => {
+    setSelectedHistoryRound((current) =>
+      current && revealedRounds.includes(current)
+        ? current
+        : revealedRounds[revealedRounds.length - 1] || '',
+    )
+  }, [revealedRounds, activeLeague?.id])
 
   const bonusDeadline = useMemo(
     () => firstCompetitionKickoff(activeCompetitionData.matches),
