@@ -747,6 +747,7 @@ function App() {
   const [authMessage, setAuthMessage] = useState('')
   const [inviteFeedback, setInviteFeedback] = useState('')
   const [approvalFeedback, setApprovalFeedback] = useState('')
+  const [requestActionKey, setRequestActionKey] = useState('')
   const [isBooting, setIsBooting] = useState(true)
   const [now, setNow] = useState(Date.now())
   const [isRemoteSyncing, setIsRemoteSyncing] = useState(false)
@@ -932,6 +933,18 @@ function App() {
       }),
     )
   }, [currentUserId, currentTab, leagues, leagueEntries, selectedLeagueId, users])
+
+  useEffect(() => {
+    if (!isSupabaseConfigured || !currentUserId) {
+      return undefined
+    }
+
+    const intervalId = window.setInterval(() => {
+      refreshRemoteState(currentUserId).catch(() => {})
+    }, 12000)
+
+    return () => window.clearInterval(intervalId)
+  }, [currentUserId])
 
   const currentUser = useMemo(
     () => users.find((user) => user.id === currentUserId) || remoteAuthUser || null,
@@ -1179,6 +1192,8 @@ function App() {
       return
     }
 
+    setRequestActionKey(`${userId}-${nextStatus}`)
+
     if (isSupabaseConfigured) {
       try {
         await updateJoinRequestRemote({
@@ -1188,6 +1203,25 @@ function App() {
           competitionId: activeLeague.competitionId,
           entry: buildEntry(activeLeague.competitionId),
         })
+
+        setLeagues((current) =>
+          current.map((league) => {
+            if (league.id !== activeLeague.id) {
+              return league
+            }
+
+            return {
+              ...league,
+              members:
+                nextStatus === 'approved' && !league.members.includes(userId)
+                  ? [...league.members, userId]
+                  : league.members,
+              joinRequests: (league.joinRequests || []).map((request) =>
+                request.userId === userId ? { ...request, status: nextStatus } : request,
+              ),
+            }
+          }),
+        )
 
         await refreshRemoteState(currentUser.id, activeLeague.id)
         setApprovalFeedback(
@@ -1201,6 +1235,8 @@ function App() {
             ? `No pudimos actualizar la solicitud: ${error.message}`
             : 'No pudimos actualizar la solicitud.',
         )
+      } finally {
+        setRequestActionKey('')
       }
 
       return
@@ -1230,6 +1266,13 @@ function App() {
     if (nextStatus === 'approved') {
       ensureMemberEntry(activeLeague, userId)
     }
+
+    setApprovalFeedback(
+      nextStatus === 'approved'
+        ? 'Solicitud aprobada correctamente.'
+        : 'Solicitud bloqueada correctamente.',
+    )
+    setRequestActionKey('')
   }
 
   const updatePrediction = async (match, side, value) => {
@@ -2535,16 +2578,22 @@ function App() {
                             <button
                               className="primary-btn"
                               type="button"
+                              disabled={requestActionKey === `${request.userId}-approved`}
                               onClick={() => handleRequestDecision(request.userId, 'approved')}
                             >
-                              Aprobar
+                              {requestActionKey === `${request.userId}-approved`
+                                ? 'Aprobando...'
+                                : 'Aprobar'}
                             </button>
                             <button
                               className="secondary-btn"
                               type="button"
+                              disabled={requestActionKey === `${request.userId}-blocked`}
                               onClick={() => handleRequestDecision(request.userId, 'blocked')}
                             >
-                              Bloquear
+                              {requestActionKey === `${request.userId}-blocked`
+                                ? 'Bloqueando...'
+                                : 'Bloquear'}
                             </button>
                           </div>
                         </article>
