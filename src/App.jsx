@@ -15,6 +15,7 @@ import {
   signUpRemote,
   supabase,
   updateJoinRequestRemote,
+  updateLeagueBonusOverridesRemote,
   updateLeagueScoringRemote,
 } from './lib/supabase'
 import './App.css'
@@ -430,6 +431,10 @@ function buildDefaultScoring() {
   }
 }
 
+function buildBonusEditOverrides() {
+  return {}
+}
+
 function defaultBonusPicks() {
   return {
     champion: '',
@@ -465,6 +470,7 @@ const starterLeagues = [
     members: ['seed-user', 'seed-user-2', 'seed-user-3'],
     joinRequests: [],
     scoring: buildDefaultScoring(),
+    bonusEditOverrides: buildBonusEditOverrides(),
     deadline: '18 mar · 21:00 CET',
   },
 ]
@@ -663,6 +669,16 @@ function lockTimestamp(match) {
   }
 
   return startsAt - EDIT_LOCK_MS
+}
+
+function firstCompetitionKickoff(matches) {
+  const timestamps = matches.map((match) => parseStartsAt(match)).filter(Boolean)
+
+  if (!timestamps.length) {
+    return null
+  }
+
+  return Math.min(...timestamps)
 }
 
 function isMatchLocked(match, now) {
@@ -1179,6 +1195,27 @@ function App() {
     return activeCompetitionData.matches.filter((match) => isPredictionRevealed(match, now))
   }, [activeCompetitionData.matches, now])
 
+  const bonusDeadline = useMemo(
+    () => firstCompetitionKickoff(activeCompetitionData.matches),
+    [activeCompetitionData.matches],
+  )
+
+  const canEditBonusPicks = useMemo(() => {
+    if (!activeLeague || !currentUser) {
+      return false
+    }
+
+    if (!bonusDeadline) {
+      return true
+    }
+
+    if (now < bonusDeadline) {
+      return true
+    }
+
+    return Boolean(activeLeague.bonusEditOverrides?.[currentUser.id])
+  }, [activeLeague, bonusDeadline, currentUser, now])
+
   const latestInviteLeague = myLeagues.find((league) => league.ownerId === currentUser?.id) || null
 
   const updateLeagueEntry = (leagueId, userId, updater) => {
@@ -1442,7 +1479,7 @@ function App() {
   }
 
   const updateBonusPick = async (field, value) => {
-    if (!activeLeague || !currentUser) {
+    if (!activeLeague || !currentUser || !canEditBonusPicks) {
       return
     }
 
@@ -1462,6 +1499,45 @@ function App() {
         await saveLeagueEntryRemote(activeLeague.id, currentUser.id, nextEntry)
       } catch {
         setInviteFeedback('No pudimos guardar tus picks extra en la nube.')
+      }
+    }
+  }
+
+  const toggleBonusPermission = async (userId, enabled) => {
+    if (!activeLeague || !isAdmin) {
+      return
+    }
+
+    const nextOverrides = {
+      ...(activeLeague.bonusEditOverrides || {}),
+      [userId]: enabled,
+    }
+
+    setLeagues((current) =>
+      current.map((league) =>
+        league.id === activeLeague.id
+          ? {
+              ...league,
+              bonusEditOverrides: nextOverrides,
+            }
+          : league,
+      ),
+    )
+
+    if (isSupabaseConfigured) {
+      try {
+        await updateLeagueBonusOverridesRemote(activeLeague.id, nextOverrides)
+        setApprovalFeedback(
+          enabled
+            ? 'Permiso extra habilitado para editar picks del torneo.'
+            : 'Permiso extra retirado para picks del torneo.',
+        )
+      } catch (error) {
+        setApprovalFeedback(
+          error?.message
+            ? `No pudimos cambiar el permiso de picks extra: ${error.message}`
+            : 'No pudimos cambiar el permiso de picks extra.',
+        )
       }
     }
   }
@@ -1618,6 +1694,7 @@ function App() {
       members: [currentUser.id],
       joinRequests: [],
       scoring: buildDefaultScoring(),
+      bonusEditOverrides: buildBonusEditOverrides(),
       deadline: 'Proxima fecha',
     }
 
@@ -2278,12 +2355,22 @@ function App() {
                 <h3>Picks extra del torneo</h3>
                 <span className="muted-chip">{myScore.bonusPoints} pts bonus</span>
               </div>
+              <p className="fixtures-footnote">
+                {bonusDeadline
+                  ? now < bonusDeadline
+                    ? `Se cierran cuando arranque el primer partido de la competicion.`
+                    : canEditBonusPicks
+                      ? 'Tienes permiso especial del admin para modificar estos picks.'
+                      : 'Se cerraron al jugarse la primera fecha. Solo el admin puede reabrirlos.'
+                  : 'Estos picks se pueden llenar antes del inicio del torneo.'}
+              </p>
               <div className="bonus-grid">
                 {bonusFields.map((field) => (
                   <label key={field.id} className="field">
                     <span>{field.label}</span>
                     <input
                       type="text"
+                      disabled={!canEditBonusPicks}
                       value={activeEntry?.bonusPicks?.[field.id] || ''}
                       onChange={(event) => updateBonusPick(field.id, event.target.value)}
                     />
@@ -2664,6 +2751,20 @@ function App() {
                               onClick={() => handleRemoveMember(userId)}
                             >
                               Botar de la liga
+                            </button>
+                            <button
+                              className="secondary-btn"
+                              type="button"
+                              onClick={() =>
+                                toggleBonusPermission(
+                                  userId,
+                                  !activeLeague.bonusEditOverrides?.[userId],
+                                )
+                              }
+                            >
+                              {activeLeague.bonusEditOverrides?.[userId]
+                                ? 'Cerrar picks extra'
+                                : 'Abrir picks extra'}
                             </button>
                           </div>
                         ) : (

@@ -20,8 +20,12 @@ create table if not exists public.leagues (
   owner_id uuid not null references public.profiles (id) on delete cascade,
   deadline text not null default 'Proxima fecha',
   scoring jsonb not null default '{}'::jsonb,
+  bonus_edit_overrides jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
+
+alter table public.leagues
+add column if not exists bonus_edit_overrides jsonb not null default '{}'::jsonb;
 
 create table if not exists public.league_members (
   league_id text not null references public.leagues (id) on delete cascade,

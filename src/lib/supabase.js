@@ -152,6 +152,7 @@ export async function fetchRemoteSnapshot(userId, defaultScoring) {
         members: memberMap.get(league.id) || [],
         joinRequests: requestMap.get(league.id) || [],
         scoring: league.scoring || defaultScoring(),
+        bonusEditOverrides: league.bonus_edit_overrides || {},
       }))
       .sort((left, right) => new Date(right.created_at) - new Date(left.created_at))
 
@@ -250,6 +251,7 @@ export async function createLeagueRemote(league, currentUserId, entry) {
       owner_id: league.ownerId,
       deadline: league.deadline,
       scoring: league.scoring,
+      bonus_edit_overrides: league.bonusEditOverrides || {},
     }),
   )
 
@@ -380,6 +382,19 @@ export async function updateLeagueScoringRemote(leagueId, scoring) {
   }
 
   const { error } = await supabase.from('leagues').update({ scoring }).eq('id', leagueId)
+  if (error) throw error
+}
+
+export async function updateLeagueBonusOverridesRemote(leagueId, bonusOverrides) {
+  if (!supabase) {
+    throw new Error('Supabase no configurado.')
+  }
+
+  const { error } = await supabase
+    .from('leagues')
+    .update({ bonus_edit_overrides: bonusOverrides })
+    .eq('id', leagueId)
+
   if (error) throw error
 }
 
