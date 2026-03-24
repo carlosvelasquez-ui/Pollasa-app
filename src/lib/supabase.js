@@ -169,6 +169,41 @@ export async function fetchRemoteSnapshot(userId, defaultScoring) {
   })
 }
 
+export async function fetchRemoteCompetitionSnapshots() {
+  if (!supabase) {
+    return null
+  }
+
+  try {
+    const { data, error } = await withSupabaseRetry(() =>
+      supabase.from('competition_snapshots').select('*'),
+    )
+
+    if (error) {
+      throw error
+    }
+
+    if (!data?.length) {
+      return null
+    }
+
+    return Object.fromEntries(
+      data.map((row) => [
+        row.competition_id,
+        {
+          source: row.source,
+          updatedAt: row.display_updated_at,
+          note: row.note,
+          competitionResults: row.competition_results || {},
+          matches: row.matches || [],
+        },
+      ]),
+    )
+  } catch {
+    return null
+  }
+}
+
 export async function ensureRemoteProfile(user, name) {
   if (!supabase || !user) {
     return

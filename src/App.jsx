@@ -4,6 +4,7 @@ import {
   createLeagueRemote,
   deleteLeagueRemote,
   ensureRemoteProfile,
+  fetchRemoteCompetitionSnapshots,
   fetchRemoteSnapshot,
   isSupabaseConfigured,
   leaveLeagueRemote,
@@ -1186,6 +1187,13 @@ function App() {
           const payload = await fixtureResponse.json()
           if (mounted && payload?.competitions) {
             setFixturesByCompetition(payload.competitions)
+          }
+        }
+
+        if (mounted && isSupabaseConfigured) {
+          const remoteCompetitions = await fetchRemoteCompetitionSnapshots()
+          if (remoteCompetitions) {
+            setFixturesByCompetition(remoteCompetitions)
           }
         }
 

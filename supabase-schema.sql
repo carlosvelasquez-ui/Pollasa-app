@@ -51,11 +51,22 @@ create table if not exists public.league_entries (
   primary key (league_id, user_id)
 );
 
+create table if not exists public.competition_snapshots (
+  competition_id text primary key,
+  source text not null default '',
+  display_updated_at text not null default '',
+  note text not null default '',
+  competition_results jsonb not null default '{}'::jsonb,
+  matches jsonb not null default '[]'::jsonb,
+  synced_at timestamptz not null default now()
+);
+
 alter table public.profiles enable row level security;
 alter table public.leagues enable row level security;
 alter table public.league_members enable row level security;
 alter table public.join_requests enable row level security;
 alter table public.league_entries enable row level security;
+alter table public.competition_snapshots enable row level security;
 
 drop policy if exists "profiles_select_authenticated" on public.profiles;
 create policy "profiles_select_authenticated"
@@ -228,6 +239,12 @@ using (
       and leagues.owner_id = auth.uid()
   )
 );
+
+drop policy if exists "competition_snapshots_select_public" on public.competition_snapshots;
+create policy "competition_snapshots_select_public"
+on public.competition_snapshots for select
+to public
+using (true);
 
 create or replace function public.handle_join_request(
   p_league_id text,
