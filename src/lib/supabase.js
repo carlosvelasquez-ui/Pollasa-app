@@ -343,31 +343,65 @@ export async function updateJoinRequestRemote({
     throw new Error('Supabase no configurado.')
   }
 
-  const { error: requestError } = await supabase.from('join_requests').upsert({
-    league_id: leagueId,
-    user_id: userId,
-    status: nextStatus,
-    requested_at: new Date().toISOString(),
-  })
+  const { error: requestError } = await withSupabaseRetry(() =>
+    supabase
+      .from('join_requests')
+      .update({
+        status: nextStatus,
+        requested_at: new Date().toISOString(),
+      })
+      .eq('league_id', leagueId)
+      .eq('user_id', userId),
+  )
 
   if (requestError) throw requestError
 
   if (nextStatus === 'approved') {
-    const { error: memberError } = await supabase.from('league_members').upsert({
-      league_id: leagueId,
-      user_id: userId,
-    })
+    const { data: existingMember, error: existingMemberError } = await withSupabaseRetry(() =>
+      supabase
+        .from('league_members')
+        .select('*')
+        .eq('league_id', leagueId)
+        .eq('user_id', userId)
+        .maybeSingle(),
+    )
 
-    if (memberError) throw memberError
+    if (existingMemberError) throw existingMemberError
 
-    const { error: entryError } = await supabase.from('league_entries').upsert({
-      league_id: leagueId,
-      user_id: userId,
-      predictions: entry.predictions,
-      bonus_picks: entry.bonusPicks,
-    })
+    if (!existingMember) {
+      const { error: memberError } = await withSupabaseRetry(() =>
+        supabase.from('league_members').insert({
+          league_id: leagueId,
+          user_id: userId,
+        }),
+      )
 
-    if (entryError) throw entryError
+      if (memberError) throw memberError
+    }
+
+    const { data: existingEntry, error: existingEntryError } = await withSupabaseRetry(() =>
+      supabase
+        .from('league_entries')
+        .select('*')
+        .eq('league_id', leagueId)
+        .eq('user_id', userId)
+        .maybeSingle(),
+    )
+
+    if (existingEntryError) throw existingEntryError
+
+    if (!existingEntry) {
+      const { error: entryError } = await withSupabaseRetry(() =>
+        supabase.from('league_entries').insert({
+          league_id: leagueId,
+          user_id: userId,
+          predictions: entry.predictions,
+          bonus_picks: entry.bonusPicks,
+        }),
+      )
+
+      if (entryError) throw entryError
+    }
   }
 }
 
