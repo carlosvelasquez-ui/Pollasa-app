@@ -947,6 +947,19 @@ function firstCompetitionKickoff(matches) {
   return Math.min(...timestamps)
 }
 
+function sortRounds(rounds) {
+  return [...rounds].sort((left, right) => {
+    const leftNumber = Number(left.match(/\d+/)?.[0] || 0)
+    const rightNumber = Number(right.match(/\d+/)?.[0] || 0)
+
+    if (leftNumber !== rightNumber) {
+      return leftNumber - rightNumber
+    }
+
+    return left.localeCompare(right)
+  })
+}
+
 function isMatchLocked(match, now) {
   const startsAt = parseStartsAt(match)
 
@@ -1094,6 +1107,7 @@ function App() {
   const [selectedPool, setSelectedPool] = useState(featuredPools[0].id)
   const [leagueForm, setLeagueForm] = useState(initialLeagueForm)
   const [selectedMatchRound, setSelectedMatchRound] = useState('')
+  const [selectedHistoryRound, setSelectedHistoryRound] = useState('')
   const [authMode, setAuthMode] = useState('signup')
   const [signupForm, setSignupForm] = useState(initialAuthForm)
   const [loginForm, setLoginForm] = useState({ email: '', password: '' })
@@ -1347,16 +1361,8 @@ function App() {
       return []
     }
 
-    const rounds = [...new Set(activeCompetitionData.matches.map((match) => match.round))]
-    const firstOpenIndex = rounds.findIndex((round) =>
-      activeCompetitionData.matches
-        .filter((match) => match.round === round)
-        .some((match) => !isMatchLocked(match, now)),
-    )
-    const startIndex = firstOpenIndex >= 0 ? firstOpenIndex : 0
-
-    return rounds.slice(startIndex, startIndex + 4)
-  }, [activeCompetitionData.matches, activeLeague?.competitionId, now])
+    return sortRounds([...new Set(activeCompetitionData.matches.map((match) => match.round))])
+  }, [activeCompetitionData.matches, activeLeague?.competitionId])
 
   const visibleMatches = useMemo(() => {
     if (activeLeague?.competitionId === 'ecuador-serie-a' && selectedMatchRound) {
@@ -1376,6 +1382,14 @@ function App() {
       current && serieARounds.includes(current) ? current : serieARounds[0] || '',
     )
   }, [activeLeague?.competitionId, activeLeague?.id, serieARounds])
+
+  useEffect(() => {
+    setSelectedHistoryRound((current) =>
+      current && revealedRounds.includes(current)
+        ? current
+        : revealedRounds[revealedRounds.length - 1] || '',
+    )
+  }, [revealedRounds, activeLeague?.id])
 
   const openLeagueDetail = (leagueId) => {
     setSelectedLeagueId(leagueId)
@@ -1461,6 +1475,19 @@ function App() {
   const revealedMatches = useMemo(() => {
     return activeCompetitionData.matches.filter((match) => isPredictionRevealed(match, now))
   }, [activeCompetitionData.matches, now])
+
+  const revealedRounds = useMemo(
+    () => sortRounds([...new Set(revealedMatches.map((match) => match.round))]),
+    [revealedMatches],
+  )
+
+  const visibleHistoryMatches = useMemo(() => {
+    if (!selectedHistoryRound) {
+      return revealedMatches
+    }
+
+    return revealedMatches.filter((match) => match.round === selectedHistoryRound)
+  }, [revealedMatches, selectedHistoryRound])
 
   const bonusDeadline = useMemo(
     () => firstCompetitionKickoff(activeCompetitionData.matches),
@@ -2801,9 +2828,23 @@ function App() {
                 </span>
               </div>
 
-              {revealedMatches.length > 0 ? (
+              {revealedRounds.length > 0 && (
+                <div className="round-switcher">
+                  {revealedRounds.map((round) => (
+                    <button
+                      key={round}
+                      className={selectedHistoryRound === round ? 'round-chip active' : 'round-chip'}
+                      onClick={() => setSelectedHistoryRound(round)}
+                    >
+                      {round}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {visibleHistoryMatches.length > 0 ? (
                 <div className="history-stack">
-                  {revealedMatches.map((match) => (
+                  {visibleHistoryMatches.map((match) => (
                     <article key={match.id} className="history-match">
                       <div className="match-meta">
                         <span>{match.round}</span>
@@ -2850,8 +2891,7 @@ function App() {
                 </div>
               ) : (
                 <p className="fixtures-footnote">
-                  Los pronosticos de cada jugador se hacen visibles cuando empieza el
-                  partido actual.
+                  Aun no hay partidos visibles en esa fecha o los pronosticos siguen bloqueados.
                 </p>
               )}
             </div>
