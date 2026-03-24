@@ -343,7 +343,7 @@ export async function updateJoinRequestRemote({
     throw new Error('Supabase no configurado.')
   }
 
-  const { error: requestError } = await withSupabaseRetry(() =>
+  const { data: updatedRequests, error: requestError } = await withSupabaseRetry(() =>
     supabase
       .from('join_requests')
       .update({
@@ -351,10 +351,14 @@ export async function updateJoinRequestRemote({
         requested_at: new Date().toISOString(),
       })
       .eq('league_id', leagueId)
-      .eq('user_id', userId),
+      .eq('user_id', userId)
+      .select(),
   )
 
   if (requestError) throw requestError
+  if (!updatedRequests?.length) {
+    throw new Error('Supabase no pudo actualizar la solicitud. Revisa las policies de join_requests.')
+  }
 
   if (nextStatus === 'approved') {
     const { data: existingMember, error: existingMemberError } = await withSupabaseRetry(() =>
@@ -369,14 +373,17 @@ export async function updateJoinRequestRemote({
     if (existingMemberError) throw existingMemberError
 
     if (!existingMember) {
-      const { error: memberError } = await withSupabaseRetry(() =>
+      const { data: insertedMembers, error: memberError } = await withSupabaseRetry(() =>
         supabase.from('league_members').insert({
           league_id: leagueId,
           user_id: userId,
-        }),
+        }).select(),
       )
 
       if (memberError) throw memberError
+      if (!insertedMembers?.length) {
+        throw new Error('Supabase no pudo agregar al jugador como miembro.')
+      }
     }
 
     const { data: existingEntry, error: existingEntryError } = await withSupabaseRetry(() =>
@@ -391,16 +398,19 @@ export async function updateJoinRequestRemote({
     if (existingEntryError) throw existingEntryError
 
     if (!existingEntry) {
-      const { error: entryError } = await withSupabaseRetry(() =>
+      const { data: insertedEntries, error: entryError } = await withSupabaseRetry(() =>
         supabase.from('league_entries').insert({
           league_id: leagueId,
           user_id: userId,
           predictions: entry.predictions,
           bonus_picks: entry.bonusPicks,
-        }),
+        }).select(),
       )
 
       if (entryError) throw entryError
+      if (!insertedEntries?.length) {
+        throw new Error('Supabase no pudo crear la entrada inicial del jugador.')
+      }
     }
   }
 }
