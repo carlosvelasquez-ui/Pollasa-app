@@ -311,6 +311,30 @@ const fallbackFixturesByCompetition = {
         status: 'scheduled',
       },
       {
+        id: 11,
+        stageKey: 'league',
+        round: 'Fecha 7',
+        home: 'Deportivo Cuenca',
+        away: 'Mushuc Runa',
+        kickoff: '30 mar 2026 · 19:00',
+        startsAt: '2026-03-30T19:00:00-05:00',
+        venue: 'Alejandro Serrano Aguilar, Cuenca',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 12,
+        stageKey: 'league',
+        round: 'Fecha 7',
+        home: 'Libertad',
+        away: 'Universidad Catolica',
+        kickoff: '30 mar 2026 · 21:15',
+        startsAt: '2026-03-30T21:15:00-05:00',
+        venue: 'Reina del Cisne, Loja',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
         id: 7,
         stageKey: 'league',
         round: 'Fecha 8',
@@ -335,6 +359,30 @@ const fallbackFixturesByCompetition = {
         status: 'scheduled',
       },
       {
+        id: 13,
+        stageKey: 'league',
+        round: 'Fecha 8',
+        home: 'El Nacional',
+        away: 'Barcelona SC',
+        kickoff: '6 abr 2026 · 18:00',
+        startsAt: '2026-04-06T18:00:00-05:00',
+        venue: 'Olimpico Atahualpa, Quito',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 14,
+        stageKey: 'league',
+        round: 'Fecha 8',
+        home: 'Delfin',
+        away: 'Independiente del Valle',
+        kickoff: '6 abr 2026 · 20:30',
+        startsAt: '2026-04-06T20:30:00-05:00',
+        venue: 'Jocay, Manta',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
         id: 9,
         stageKey: 'league',
         round: 'Fecha 9',
@@ -355,6 +403,30 @@ const fallbackFixturesByCompetition = {
         kickoff: '12 abr 2026 · 15:00',
         startsAt: '2026-04-12T15:00:00-05:00',
         venue: 'Jocay, Manta',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 15,
+        stageKey: 'league',
+        round: 'Fecha 9',
+        home: 'Universidad Catolica',
+        away: 'Aucas',
+        kickoff: '13 abr 2026 · 19:00',
+        startsAt: '2026-04-13T19:00:00-05:00',
+        venue: 'Olimpico Atahualpa, Quito',
+        details: 'Calendario LigaPro Ecuador',
+        status: 'scheduled',
+      },
+      {
+        id: 16,
+        stageKey: 'league',
+        round: 'Fecha 9',
+        home: 'Mushuc Runa',
+        away: 'Orense',
+        kickoff: '13 abr 2026 · 21:15',
+        startsAt: '2026-04-13T21:15:00-05:00',
+        venue: 'Echaleche, Ambato',
         details: 'Calendario LigaPro Ecuador',
         status: 'scheduled',
       },
@@ -2358,7 +2430,10 @@ function App() {
               <p className="fixtures-footnote">
                 {bonusDeadline
                   ? now < bonusDeadline
-                    ? `Se cierran cuando arranque el primer partido de la competicion.`
+                    ? `Se cierran cuando arranque el primer partido de la competicion. Quedan ${formatCountdown(
+                        bonusDeadline,
+                        now,
+                      )}.`
                     : canEditBonusPicks
                       ? 'Tienes permiso especial del admin para modificar estos picks.'
                       : 'Se cerraron al jugarse la primera fecha. Solo el admin puede reabrirlos.'
