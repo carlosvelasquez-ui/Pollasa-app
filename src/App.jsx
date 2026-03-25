@@ -1119,12 +1119,15 @@ function App() {
   const [approvalFeedback, setApprovalFeedback] = useState('')
   const [requestActionKey, setRequestActionKey] = useState('')
   const [selectedBonusViewerId, setSelectedBonusViewerId] = useState('')
+  const [predictionSaveState, setPredictionSaveState] = useState('idle')
+  const [predictionSaveMessage, setPredictionSaveMessage] = useState('')
   const [isBooting, setIsBooting] = useState(true)
   const [now, setNow] = useState(Date.now())
   const [isRemoteSyncing, setIsRemoteSyncing] = useState(false)
   const [remoteAuthUser, setRemoteAuthUser] = useState(null)
   const hasBootedRef = useRef(false)
   const remoteSyncRef = useRef(Promise.resolve())
+  const matchInputRefs = useRef({})
 
   const refreshRemoteState = async (userId, preferredLeagueId = selectedLeagueId) => {
     if (!isSupabaseConfigured || !userId) {
@@ -1399,6 +1402,11 @@ function App() {
     )
   }, [activeCompetitionData.matches, activeLeague?.competitionId, activeLeague?.id, now, serieARounds])
 
+  useEffect(() => {
+    setPredictionSaveState('idle')
+    setPredictionSaveMessage('')
+  }, [activeLeague?.id, currentUser?.id, selectedMatchRound])
+
   const openLeagueDetail = (leagueId) => {
     setSelectedLeagueId(leagueId)
     setHomeLeagueView('detail')
@@ -1527,6 +1535,39 @@ function App() {
   }, [activeLeague, bonusDeadline, currentUser, now])
 
   const latestInviteLeague = myLeagues.find((league) => league.ownerId === currentUser?.id) || null
+
+  const registerMatchInputRef = (matchId, side) => (element) => {
+    if (!matchInputRefs.current[matchId]) {
+      matchInputRefs.current[matchId] = {}
+    }
+
+    matchInputRefs.current[matchId][side] = element
+  }
+
+  const focusPredictionInput = (matchId, side) => {
+    const input = matchInputRefs.current?.[matchId]?.[side]
+    if (input) {
+      input.focus()
+      input.select?.()
+    }
+  }
+
+  const advancePredictionFocus = (matchId, side) => {
+    const matchIndex = visibleMatches.findIndex((item) => item.id === matchId)
+    if (matchIndex === -1) {
+      return
+    }
+
+    if (side === 'home') {
+      focusPredictionInput(matchId, 'away')
+      return
+    }
+
+    const nextMatch = visibleMatches[matchIndex + 1]
+    if (nextMatch) {
+      focusPredictionInput(nextMatch.id, 'home')
+    }
+  }
 
   const updateLeagueEntry = (leagueId, userId, updater) => {
     setLeagueEntries((current) => ({
@@ -1752,14 +1793,8 @@ function App() {
       }
 
       updateLeagueEntry(activeLeague.id, currentUser.id, () => nextEntry)
-
-      if (isSupabaseConfigured) {
-        try {
-          await saveLeagueEntryRemote(activeLeague.id, currentUser.id, nextEntry)
-        } catch {
-          setInviteFeedback('No pudimos guardar tu pronostico en la nube.')
-        }
-      }
+      setPredictionSaveState('dirty')
+      setPredictionSaveMessage('Tienes cambios sin guardar.')
 
       return
     }
@@ -1778,14 +1813,49 @@ function App() {
     }
 
     updateLeagueEntry(activeLeague.id, currentUser.id, () => nextEntry)
+    setPredictionSaveState('dirty')
+    setPredictionSaveMessage('Tienes cambios sin guardar.')
+  }
+
+  const handlePredictionInputChange = (match, side, rawValue) => {
+    const trimmedValue = `${rawValue ?? ''}`.slice(0, 1)
+    updatePrediction(match, side, trimmedValue)
+
+    if (trimmedValue !== '') {
+      window.setTimeout(() => {
+        advancePredictionFocus(match.id, side)
+      }, 0)
+    }
+  }
+
+  const savePredictions = async () => {
+    if (!activeLeague || !currentUser || !activeEntry) {
+      return
+    }
+
+    setPredictionSaveState('saving')
+    setPredictionSaveMessage('Guardando resultados...')
 
     if (isSupabaseConfigured) {
       try {
-        await saveLeagueEntryRemote(activeLeague.id, currentUser.id, nextEntry)
-      } catch {
-        setInviteFeedback('No pudimos guardar tu pronostico en la nube.')
+        await saveLeagueEntryRemote(activeLeague.id, currentUser.id, activeEntry)
+        await refreshRemoteState(currentUser.id, activeLeague.id)
+        setPredictionSaveState('saved')
+        setPredictionSaveMessage('Resultados guardados correctamente.')
+      } catch (error) {
+        setPredictionSaveState('error')
+        setPredictionSaveMessage(
+          error?.message
+            ? `No pudimos guardar tus resultados: ${error.message}`
+            : 'No pudimos guardar tus resultados.',
+        )
       }
+
+      return
     }
+
+    setPredictionSaveState('saved')
+    setPredictionSaveMessage('Resultados guardados correctamente.')
   }
 
   const updateBonusPick = async (field, value) => {
@@ -2749,10 +2819,16 @@ function App() {
                               type="number"
                               min="0"
                               max="9"
+                              inputMode="numeric"
+                              autoComplete="off"
+                              autoCorrect="off"
+                              autoCapitalize="off"
+                              spellCheck="false"
                               disabled={locked}
+                              ref={registerMatchInputRef(match.id, 'home')}
                               value={activeEntry?.predictions?.[match.id]?.home ?? ''}
                               onChange={(event) =>
-                                updatePrediction(match, 'home', event.target.value)
+                                handlePredictionInputChange(match, 'home', event.target.value)
                               }
                             />
                           </label>
@@ -2763,10 +2839,16 @@ function App() {
                               type="number"
                               min="0"
                               max="9"
+                              inputMode="numeric"
+                              autoComplete="off"
+                              autoCorrect="off"
+                              autoCapitalize="off"
+                              spellCheck="false"
                               disabled={locked}
+                              ref={registerMatchInputRef(match.id, 'away')}
                               value={activeEntry?.predictions?.[match.id]?.away ?? ''}
                               onChange={(event) =>
-                                updatePrediction(match, 'away', event.target.value)
+                                handlePredictionInputChange(match, 'away', event.target.value)
                               }
                             />
                           </label>
@@ -2786,6 +2868,27 @@ function App() {
                     </article>
                   )
                 })}
+              </div>
+              <div className="prediction-actions">
+                <button
+                  type="button"
+                  className="primary-btn full"
+                  disabled={predictionSaveState === 'saving' || !activeEntry}
+                  onClick={savePredictions}
+                >
+                  {predictionSaveState === 'saving' ? 'Guardando...' : 'Guardar resultados'}
+                </button>
+                {predictionSaveMessage && (
+                  <p
+                    className={
+                      predictionSaveState === 'error'
+                        ? 'prediction-save-status error'
+                        : 'prediction-save-status'
+                    }
+                  >
+                    {predictionSaveMessage}
+                  </p>
+                )}
               </div>
               <p className="fixtures-footnote">{activeCompetitionData.note}</p>
             </div>
