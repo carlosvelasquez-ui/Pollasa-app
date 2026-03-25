@@ -1394,7 +1394,7 @@ function App() {
     }
 
     return (
-      serieARounds.find((round) =>
+      [...serieARounds].reverse().find((round) =>
         activeCompetitionData.matches
           .filter((match) => match.round === round)
           .some((match) => !isMatchLocked(match, now)),
@@ -1599,6 +1599,23 @@ function App() {
     const nextMatch = visibleMatches[matchIndex + 1]
     if (nextMatch) {
       focusPredictionInput(nextMatch.id, 'home')
+    }
+  }
+
+  const retreatPredictionFocus = (matchId, side) => {
+    const matchIndex = visibleMatches.findIndex((item) => item.id === matchId)
+    if (matchIndex === -1) {
+      return
+    }
+
+    if (side === 'away') {
+      focusPredictionInput(matchId, 'home')
+      return
+    }
+
+    const previousMatch = visibleMatches[matchIndex - 1]
+    if (previousMatch) {
+      focusPredictionInput(previousMatch.id, 'away')
     }
   }
 
@@ -1851,6 +1868,13 @@ function App() {
       window.setTimeout(() => {
         advancePredictionFocus(match.id, side)
       }, 0)
+    }
+  }
+
+  const handlePredictionInputKeyDown = (event, match, side) => {
+    if ((event.key === 'Backspace' || event.key === 'Delete') && event.currentTarget.value === '') {
+      event.preventDefault()
+      retreatPredictionFocus(match.id, side)
     }
   }
 
@@ -2853,6 +2877,9 @@ function App() {
                               disabled={locked}
                               ref={registerMatchInputRef(match.id, 'home')}
                               value={activeEntry?.predictions?.[match.id]?.home ?? ''}
+                              onKeyDown={(event) =>
+                                handlePredictionInputKeyDown(event, match, 'home')
+                              }
                               onChange={(event) =>
                                 handlePredictionInputChange(match, 'home', event.target.value)
                               }
@@ -2873,6 +2900,9 @@ function App() {
                               disabled={locked}
                               ref={registerMatchInputRef(match.id, 'away')}
                               value={activeEntry?.predictions?.[match.id]?.away ?? ''}
+                              onKeyDown={(event) =>
+                                handlePredictionInputKeyDown(event, match, 'away')
+                              }
                               onChange={(event) =>
                                 handlePredictionInputChange(match, 'away', event.target.value)
                               }
