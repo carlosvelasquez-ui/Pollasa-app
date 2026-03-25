@@ -1383,24 +1383,46 @@ function App() {
     return activeCompetitionData.matches
   }, [activeCompetitionData.matches, activeLeague?.competitionId, selectedMatchRound])
 
+  const defaultMatchRound = useMemo(() => {
+    if (activeLeague?.competitionId !== 'ecuador-serie-a') {
+      return ''
+    }
+
+    return (
+      serieARounds.find((round) =>
+        activeCompetitionData.matches
+          .filter((match) => match.round === round)
+          .some((match) => !isMatchLocked(match, now)),
+      ) ||
+      serieARounds[serieARounds.length - 1] ||
+      ''
+    )
+  }, [activeCompetitionData.matches, activeLeague?.competitionId, now, serieARounds])
+
   useEffect(() => {
     if (activeLeague?.competitionId !== 'ecuador-serie-a') {
       setSelectedMatchRound('')
       return
     }
 
-    const nextOpenRound = serieARounds.find((round) =>
-      activeCompetitionData.matches
-        .filter((match) => match.round === round)
-        .some((match) => !isMatchLocked(match, now)),
-    )
-
     setSelectedMatchRound((current) =>
       current && serieARounds.includes(current)
         ? current
-        : nextOpenRound || serieARounds[serieARounds.length - 1] || '',
+        : defaultMatchRound,
     )
-  }, [activeCompetitionData.matches, activeLeague?.competitionId, activeLeague?.id, now, serieARounds])
+  }, [
+    activeLeague?.competitionId,
+    activeLeague?.id,
+    defaultMatchRound,
+    now,
+    serieARounds,
+  ])
+
+  useEffect(() => {
+    if (currentTab === 'matches' && activeLeague?.competitionId === 'ecuador-serie-a') {
+      setSelectedMatchRound(defaultMatchRound)
+    }
+  }, [activeLeague?.competitionId, currentTab, defaultMatchRound])
 
   useEffect(() => {
     setPredictionSaveState('idle')
@@ -1420,6 +1442,10 @@ function App() {
   const jumpToLeagueTab = (tabId) => {
     setCurrentTab(tabId)
     setHomeLeagueView('detail')
+
+    if (tabId === 'matches' && activeLeague?.competitionId === 'ecuador-serie-a') {
+      setSelectedMatchRound(defaultMatchRound)
+    }
   }
 
   const pendingLeagueCount = useMemo(() => {
@@ -1771,48 +1797,41 @@ function App() {
     setRequestActionKey('')
   }
 
-  const updatePrediction = async (match, side, value) => {
+  const updatePrediction = (match, side, value) => {
     if (!activeLeague || !currentUser || isMatchLocked(match, now)) {
       return
     }
 
-    if (value === '') {
-      const currentEntry = leagueEntries?.[activeLeague.id]?.[currentUser.id] || buildEntry(activeLeague.competitionId)
-      const nextPredictions = { ...currentEntry.predictions }
+    updateLeagueEntry(activeLeague.id, currentUser.id, (existingEntry) => {
+      const currentEntry = existingEntry || buildEntry(activeLeague.competitionId)
+      const nextPredictions = { ...(currentEntry.predictions || {}) }
 
-      if (nextPredictions[match.id]) {
-        nextPredictions[match.id] = {
-          ...nextPredictions[match.id],
-          [side]: '',
+      if (value === '') {
+        if (nextPredictions[match.id]) {
+          nextPredictions[match.id] = {
+            ...nextPredictions[match.id],
+            [side]: '',
+          }
+        }
+
+        return {
+          ...currentEntry,
+          predictions: nextPredictions,
         }
       }
 
-      const nextEntry = {
+      const safeValue = Math.max(0, Math.min(9, Number(value) || 0))
+      return {
         ...currentEntry,
-        predictions: nextPredictions,
-      }
-
-      updateLeagueEntry(activeLeague.id, currentUser.id, () => nextEntry)
-      setPredictionSaveState('dirty')
-      setPredictionSaveMessage('Tienes cambios sin guardar.')
-
-      return
-    }
-
-    const safeValue = Math.max(0, Math.min(9, Number(value) || 0))
-    const currentEntry = leagueEntries?.[activeLeague.id]?.[currentUser.id] || buildEntry(activeLeague.competitionId)
-    const nextEntry = {
-      ...currentEntry,
-      predictions: {
-        ...currentEntry.predictions,
-        [match.id]: {
-          ...(currentEntry.predictions?.[match.id] || { home: 0, away: 0 }),
-          [side]: safeValue,
+        predictions: {
+          ...nextPredictions,
+          [match.id]: {
+            ...(currentEntry.predictions?.[match.id] || { home: 0, away: 0 }),
+            [side]: safeValue,
+          },
         },
-      },
-    }
-
-    updateLeagueEntry(activeLeague.id, currentUser.id, () => nextEntry)
+      }
+    })
     setPredictionSaveState('dirty')
     setPredictionSaveMessage('Tienes cambios sin guardar.')
   }
