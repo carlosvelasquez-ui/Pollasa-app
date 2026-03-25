@@ -1316,7 +1316,12 @@ function App() {
   }, [currentUserId, currentTab, leagues, leagueEntries, selectedLeagueId, users])
 
   useEffect(() => {
-    if (!isSupabaseConfigured || !currentUserId) {
+    if (
+      !isSupabaseConfigured ||
+      !currentUserId ||
+      predictionSaveState === 'dirty' ||
+      predictionSaveState === 'saving'
+    ) {
       return undefined
     }
 
@@ -1325,7 +1330,7 @@ function App() {
     }, 12000)
 
     return () => window.clearInterval(intervalId)
-  }, [currentUserId])
+  }, [currentUserId, predictionSaveState])
 
   const currentUser = useMemo(
     () => users.find((user) => user.id === currentUserId) || remoteAuthUser || null,
@@ -1419,12 +1424,6 @@ function App() {
   ])
 
   useEffect(() => {
-    if (currentTab === 'matches' && activeLeague?.competitionId === 'ecuador-serie-a') {
-      setSelectedMatchRound(defaultMatchRound)
-    }
-  }, [activeLeague?.competitionId, currentTab, defaultMatchRound])
-
-  useEffect(() => {
     setPredictionSaveState('idle')
     setPredictionSaveMessage('')
   }, [activeLeague?.id, currentUser?.id, selectedMatchRound])
@@ -1442,6 +1441,14 @@ function App() {
   const jumpToLeagueTab = (tabId) => {
     setCurrentTab(tabId)
     setHomeLeagueView('detail')
+
+    if (tabId === 'matches' && activeLeague?.competitionId === 'ecuador-serie-a') {
+      setSelectedMatchRound(defaultMatchRound)
+    }
+  }
+
+  const openAppTab = (tabId) => {
+    setCurrentTab(tabId)
 
     if (tabId === 'matches' && activeLeague?.competitionId === 'ecuador-serie-a') {
       setSelectedMatchRound(defaultMatchRound)
@@ -3357,7 +3364,7 @@ function App() {
           <button
             key={tab.id}
             className={currentTab === tab.id ? 'bottom-tab active' : 'bottom-tab'}
-            onClick={() => setCurrentTab(tab.id)}
+            onClick={() => openAppTab(tab.id)}
           >
             <span className="bottom-tab-icon">
               <TabIcon tabId={tab.id} active={currentTab === tab.id} />
